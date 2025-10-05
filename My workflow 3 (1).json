@@ -1,0 +1,287 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aa12bd22-54dc-47d3-acdc-76d0204882c3",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IhjulOTglvuAfBph",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7e0d454e-183d-4614-8803-dcc49ba0da46",
+              "leftValue": "={{ $json.Subject }}",
+              "rightValue": "New Order Received",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "13837543-cfce-47a2-aea5-0edb7a821ffa",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const snippet = $json[\"snippet\"] || \"\";\nconst from = $json[\"From\"] || \"\";\nconst now = new Date().toISOString();\n\nconst orderId = (snippet.match(/Order ID:\\s*(\\S+)/i) || [null, null])[1] || null;\n\nconst customerName = snippet.match(/Customer Name:\\s*(.*?)\\s*Product:/)?.[1] || \"Unknown\";\nconst product = snippet.match(/Product:\\s*(.*?)\\s*Quantity:/)?.[1] || \"Unknown\";\nconst quantity = Number((snippet.match(/Quantity:\\s*(\\d+)/i) || [null, \"1\"])[1]) || 1;\nconst price = Number((snippet.match(/Price:\\s*\\$?([0-9.,]+)/i) || [null, \"0\"])[1].replace(/,/g,'')) || 0.0;\nconst customerEmail = snippet.match(/Email:\\s*(\\S+)/)?.[1] || $json[\"From\"];\n\nconst uniqueKey = orderId || `${customerEmail}|${product}|${new Date().toISOString().slice(0,10)}`;\n\nreturn {\n  json: {\n    \"OrderID\": orderId,\n    \"UniqueKey\": uniqueKey,\n    \"Date\": now,\n    \"Customer Name\": customerName,\n    \"Product\": product,\n    \"Quantity\": quantity,\n    \"Price\": price,\n    \"Customer Email\": customerEmail,\n    \"Total\": (quantity * price)\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "b1a77ed2-f88a-42e3-afbf-65b6862ad714",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Templates (retriever simulation)\nconst templates = [\n  \"Hi {{name}}, thanks for ordering {{product}}! We really appreciate your trust.\",\n  \"Hello {{name}}, your order of {{product}} (x{{quantity}}) is confirmed. Thank you for shopping with us!\",\n  \"Dear {{name}}, we received your order for {{product}}. We’re excited to serve you!\"\n];\n\n// Pick a random template\nconst selectedTemplate = templates[Math.floor(Math.random() * templates.length)];\n\n// Fill in placeholders\nconst emailBody = selectedTemplate\n  .replace(\"{{name}}\", $json[\"Customer Name\"])\n  .replace(\"{{product}}\", $json[\"Product\"])\n  .replace(\"{{quantity}}\", $json[\"Quantity\"]);\n\nreturn [{\n  json: {\n    \"Customer Email\": $json[\"Customer Email\"],\n    \"Subject\": \"Thank you for your order!\",\n    \"Body\": emailBody\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -160
+      ],
+      "id": "95d0b957-9b38-4ea0-b28e-eb1815f72404",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json[\"Customer Email\"] }}",
+        "subject": "={{ $json.Subject }}",
+        "emailType": "text",
+        "message": "={{ $json.Body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1216,
+        -160
+      ],
+      "id": "ac96c213-f1b5-4515-9cfd-5b0386ec3bb4",
+      "name": "Send a message",
+      "webhookId": "d1e077f9-f1da-4bad-9cd6-14b6d772838f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IhjulOTglvuAfBph",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fC-qttJ__6Z9lIK2iDkHxhCdS_XOB9ZFsxLaWc-TiiY",
+          "mode": "list",
+          "cachedResultName": "Customer Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fC-qttJ__6Z9lIK2iDkHxhCdS_XOB9ZFsxLaWc-TiiY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2125316153,
+          "mode": "list",
+          "cachedResultName": "Sales",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fC-qttJ__6Z9lIK2iDkHxhCdS_XOB9ZFsxLaWc-TiiY/edit#gid=2125316153"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Name": "={{ $json[\"Customer Name\"] }}",
+            "Product": "={{ $json.Product }}",
+            "Quantity": "={{ $json.Quantity }}",
+            "Price": "={{ $json.Price }}",
+            "Email": "={{ $json[\"Customer Email\"] }}",
+            "Total": "={{$json[\"quantity\"] * $json[\"price\"]}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        944,
+        96
+      ],
+      "id": "512b6358-d88b-4b29-8b85-4cbddc054473",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VHYLGLxGcYqyAeZD",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e68b927c-e5bb-4940-8604-fca7408e3aef",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f7f6eea293263a66bef53c86918634d991dd8fad57a4b9861d6222a02ab295d7"
+  },
+  "id": "nIxnBuCtLM1leElT",
+  "tags": []
+}

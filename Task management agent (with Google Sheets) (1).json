@@ -1,0 +1,92 @@
+{
+  "name": "Task management agent (with Google Sheets)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1fC-qttJ__6Z9lIK2iDkHxhCdS_XOB9ZFsxLaWc-TiiY/edit?gid=0#gid=0https://docs.google.com/spreadsheets/d/1fC-qttJ__6Z9lIK2iDkHxhCdS_XOB9ZFsxLaWc-TiiY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1fC-qttJ__6Z9lIK2iDkHxhCdS_XOB9ZFsxLaWc-TiiY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b313de2d-b2a4-4482-af74-735dd27b1c30",
+      "name": "Google Sheets Trigger",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "69nLryX7KWLKH62a",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "keerthananamulametu@gmail.com",
+        "subject": "=📦 New Order Received\n",
+        "message": "=<div style=\"font-family: Arial, sans-serif; line-height: 1.5; color: #333;\">\n  <h2 style=\"color: #2E86C1;\">📦 New Order Received</h2>\n  <p><strong>Customer Name:</strong> {{$json[\"Customer Name\"]}}</p>\n  <p><strong>Product:</strong> {{$json[\"Product\"]}}</p>\n  <p><strong>Quantity:</strong> {{$json[\"Quantity\"]}}</p>\n  <p><strong>Price:</strong> ${{$json[\"Price\"]}}</p>\n  <p><strong>Date:</strong> {{$json[\"Date\"]}}</p>\n  <p><strong>Email:</strong> {{$json[\"Email\"]}}</p>\n  <hr style=\"border: 0; border-top: 1px solid #ccc;\" />\n  <p style=\"color: #555;\">Thank you for keeping track of your orders! 🎉</p>\n</div>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1456,
+        0
+      ],
+      "id": "8e8ac509-10a7-459b-8323-8a15d9762e68",
+      "name": "Send a message",
+      "webhookId": "4b089b7b-0151-4bfd-a89e-288252e7b96f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "lz09l4geDPxW34YR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "72afc0f2-4c2d-4e66-a55e-58ed8fcdc53f",
+  "meta": {
+    "templateId": "task_management_agent_with_google_sheets",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f7f6eea293263a66bef53c86918634d991dd8fad57a4b9861d6222a02ab295d7"
+  },
+  "id": "23guPvebh9jKjf36",
+  "tags": []
+}
